@@ -1,7 +1,12 @@
 import { compact, getSlotCompoundVariant, memo, splitProps } from '../helpers.mjs';
 import { createRecipe } from './create-recipe.mjs';
 
-const dataTableDefaultVariants = {}
+const dataTableDefaultVariants = {
+  "size": "md",
+  "stickyHeader": false,
+  "zebra": false,
+  "variant": "plain"
+}
 const dataTableCompoundVariants = []
 
 const dataTableSlotNames = [
@@ -36,6 +41,22 @@ const dataTableSlotNames = [
   [
     "empty",
     "dataTable__empty"
+  ],
+  [
+    "selectionCell",
+    "dataTable__selectionCell"
+  ],
+  [
+    "selectionHeaderCell",
+    "dataTable__selectionHeaderCell"
+  ],
+  [
+    "rowNumber",
+    "dataTable__rowNumber"
+  ],
+  [
+    "checkbox",
+    "dataTable__checkbox"
   ]
 ]
 const dataTableSlotFns = /* @__PURE__ */ dataTableSlotNames.map(([slotName, slotKey]) => [slotName, createRecipe(slotKey, dataTableDefaultVariants, getSlotCompoundVariant(dataTableCompoundVariants, slotName))])
@@ -44,7 +65,12 @@ const dataTableFn = memo((props = {}) => {
   return Object.fromEntries(dataTableSlotFns.map(([slotName, slotFn]) => [slotName, slotFn.recipeFn(props)]))
 })
 
-const dataTableVariantKeys = []
+const dataTableVariantKeys = [
+  "size",
+  "stickyHeader",
+  "zebra",
+  "variant"
+]
 const getVariantProps = (variants) => ({ ...dataTableDefaultVariants, ...compact(variants) })
 
 export const dataTable = /* @__PURE__ */ Object.assign(dataTableFn, {
@@ -53,7 +79,25 @@ export const dataTable = /* @__PURE__ */ Object.assign(dataTableFn, {
   raw: (props) => props,
   classNameMap: {},
   variantKeys: dataTableVariantKeys,
-  variantMap: {},
+  variantMap: {
+  "size": [
+    "sm",
+    "md",
+    "lg"
+  ],
+  "stickyHeader": [
+    "true",
+    "false"
+  ],
+  "zebra": [
+    "true",
+    "false"
+  ],
+  "variant": [
+    "plain",
+    "card"
+  ]
+},
   splitVariantProps(props) {
     return splitProps(props, dataTableVariantKeys)
   },

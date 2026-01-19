@@ -10,6 +10,8 @@ export interface DataTableProps<TData extends BaseRowData> {
   pageSize?: number;
   pageSizeOptions?: number[];
   enablePagination?: boolean;
+  enableRowSelection?: boolean;
+  onRowSelectionChange?: (selectedRows: TData[]) => void;
   emptyMessage?: string;
 }
 

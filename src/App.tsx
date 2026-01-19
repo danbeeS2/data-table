@@ -1,20 +1,44 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "./components/DataTable";
+import { DataTable, TextCell } from "./components/DataTable";
 import { tableRowData, type TableRowData } from "./data/mockData";
 import { hstack } from "../styled-system/patterns";
 
 const columns: ColumnDef<TableRowData>[] = [
-  { accessorKey: "title", header: "제목" },
-  { accessorKey: "text", header: "텍스트" },
-  { accessorKey: "textField", header: "텍스트 필드" },
+  {
+    accessorKey: "title",
+    header: "제목",
+    cell: ({ getValue }) => <TextCell value={getValue<string>()} />,
+  },
+  {
+    accessorKey: "text",
+    header: "텍스트",
+    cell: ({ getValue }) => <TextCell value={getValue<string>()} />,
+  },
+  {
+    accessorKey: "textField",
+    header: "텍스트 필드",
+    cell: ({ getValue }) => <TextCell value={getValue<string>()} />,
+  },
   {
     accessorKey: "selections",
     header: "유형 선택",
-    cell: ({ row }) => row.original.selections.join(", "),
+    cell: ({ row }) => <TextCell value={row.original.selections.join(", ")} />,
   },
-  { accessorKey: "typeChip", header: "유형" },
-  { accessorKey: "createdAt", header: "작성일" },
-  { accessorKey: "author", header: "작성자" },
+  {
+    accessorKey: "typeChip",
+    header: "유형",
+    cell: ({ getValue }) => <TextCell value={getValue<string>()} />,
+  },
+  {
+    accessorKey: "createdAt",
+    header: "작성일",
+    cell: ({ getValue }) => <TextCell value={getValue<string>()} />,
+  },
+  {
+    accessorKey: "author",
+    header: "작성자",
+    cell: ({ getValue }) => <TextCell value={getValue<string>()} />,
+  },
   {
     id: "actions",
     header: "",
@@ -31,6 +55,7 @@ export default function App() {
         columns={columns}
         pageSize={10}
         pageSizeOptions={[10, 25, 50]}
+        enableRowSelection
       />
     </div>
   );

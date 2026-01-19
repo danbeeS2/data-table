@@ -3,14 +3,29 @@ import type { ConditionalValue } from '../types/index';
 import type { DistributiveOmit, Pretty } from '../types/system-types';
 
 interface DataTableVariant {
-  
+  /**
+ * @default "md"
+ */
+size: "sm" | "md" | "lg"
+/**
+ * @default false
+ */
+stickyHeader: boolean
+/**
+ * @default false
+ */
+zebra: boolean
+/**
+ * @default "plain"
+ */
+variant: "plain" | "card"
 }
 
 type DataTableVariantMap = {
   [key in keyof DataTableVariant]: Array<DataTableVariant[key]>
 }
 
-type DataTableSlot = "root" | "table" | "thead" | "tbody" | "tr" | "th" | "td" | "empty"
+type DataTableSlot = "root" | "table" | "thead" | "tbody" | "tr" | "th" | "td" | "empty" | "selectionCell" | "selectionHeaderCell" | "rowNumber" | "checkbox"
 
 export type DataTableVariantProps = {
   [key in keyof DataTableVariant]?: ConditionalValue<DataTableVariant[key]> | undefined
@@ -28,6 +43,6 @@ export interface DataTableRecipe {
 }
 
 /**
- * Styles for TanStack DataTable
+ * Styles for TanStack DataTable component based on Figma design
  */
 export declare const dataTable: DataTableRecipe
