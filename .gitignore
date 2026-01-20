@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+.pnpm-store/
 
 # Build output
 dist/
@@ -26,3 +27,12 @@ npm-debug.log*
 # Cache
 .cache/
 *.tsbuildinfo
+
+# Tests
+coverage/
+
+# 기타 local 파일
+*.local
+
+# MCP 설정 (토큰 포함)
+.mcp.json

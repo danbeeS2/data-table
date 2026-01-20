@@ -1,6 +1,8 @@
 import { defineConfig } from "@pandacss/dev";
 import { dataTable } from "./src/preset/recipes/dataTable";
 import { dataTableCell } from "./src/preset/recipes/dataTableCell";
+import { dataTableRow } from "./src/preset/recipes/dataTableRow";
+import { dataTableHeader } from "./src/preset/recipes/dataTableHeader";
 import { pagination } from "./src/preset/recipes/pagination";
 
 export default defineConfig({
@@ -12,6 +14,8 @@ export default defineConfig({
       slotRecipes: {
         dataTable,
         dataTableCell,
+        dataTableRow,
+        dataTableHeader,
         pagination,
       },
     },

@@ -2,8 +2,12 @@ import { compact, getSlotCompoundVariant, memo, splitProps } from '../helpers.mj
 import { createRecipe } from './create-recipe.mjs';
 
 const dataTableCellDefaultVariants = {
+  "size": "normal",
+  "state": "inactive",
   "variant": "basic",
-  "size": "normal"
+  "align": "left",
+  "chipVariant": "default",
+  "expanded": false
 }
 const dataTableCellCompoundVariants = []
 
@@ -47,6 +51,86 @@ const dataTableCellSlotNames = [
   [
     "rowNumber",
     "dataTableCell__rowNumber"
+  ],
+  [
+    "textTemplate",
+    "dataTableCell__textTemplate"
+  ],
+  [
+    "textBreadcrumbs",
+    "dataTableCell__textBreadcrumbs"
+  ],
+  [
+    "textDescription",
+    "dataTableCell__textDescription"
+  ],
+  [
+    "textField",
+    "dataTableCell__textField"
+  ],
+  [
+    "autoComplete",
+    "dataTableCell__autoComplete"
+  ],
+  [
+    "autoCompleteDropdown",
+    "dataTableCell__autoCompleteDropdown"
+  ],
+  [
+    "autoCompleteOption",
+    "dataTableCell__autoCompleteOption"
+  ],
+  [
+    "avatar",
+    "dataTableCell__avatar"
+  ],
+  [
+    "avatarImage",
+    "dataTableCell__avatarImage"
+  ],
+  [
+    "avatarFallback",
+    "dataTableCell__avatarFallback"
+  ],
+  [
+    "avatarName",
+    "dataTableCell__avatarName"
+  ],
+  [
+    "chip",
+    "dataTableCell__chip"
+  ],
+  [
+    "chipLabel",
+    "dataTableCell__chipLabel"
+  ],
+  [
+    "chipRemove",
+    "dataTableCell__chipRemove"
+  ],
+  [
+    "controller",
+    "dataTableCell__controller"
+  ],
+  [
+    "controllerButton",
+    "dataTableCell__controllerButton"
+  ],
+  [
+    "dragHandle",
+    "dataTableCell__dragHandle"
+  ],
+  [
+    "dragHandleIcon",
+    "dataTableCell__dragHandleIcon"
+  ],
+  [
+    "collapseExpand",
+    "dataTableCell__collapseExpand"
+  ],
+  [
+    "collapseExpandIcon",
+    "dataTableCell__collapseExpandIcon"
   ]
 ]
 const dataTableCellSlotFns = /* @__PURE__ */ dataTableCellSlotNames.map(([slotName, slotKey]) => [slotName, createRecipe(slotKey, dataTableCellDefaultVariants, getSlotCompoundVariant(dataTableCellCompoundVariants, slotName))])
@@ -56,8 +140,12 @@ const dataTableCellFn = memo((props = {}) => {
 })
 
 const dataTableCellVariantKeys = [
+  "size",
+  "state",
   "variant",
-  "size"
+  "align",
+  "chipVariant",
+  "expanded"
 ]
 const getVariantProps = (variants) => ({ ...dataTableCellDefaultVariants, ...compact(variants) })
 
@@ -68,13 +156,36 @@ export const dataTableCell = /* @__PURE__ */ Object.assign(dataTableCellFn, {
   classNameMap: {},
   variantKeys: dataTableCellVariantKeys,
   variantMap: {
+  "size": [
+    "normal",
+    "mini"
+  ],
+  "state": [
+    "inactive",
+    "hover",
+    "focus",
+    "focus-active"
+  ],
   "variant": [
     "basic",
     "utility"
   ],
-  "size": [
-    "normal",
-    "mini"
+  "align": [
+    "left",
+    "center",
+    "right"
+  ],
+  "chipVariant": [
+    "default",
+    "primary",
+    "secondary",
+    "success",
+    "warning",
+    "error"
+  ],
+  "expanded": [
+    "true",
+    "false"
   ]
 },
   splitVariantProps(props) {

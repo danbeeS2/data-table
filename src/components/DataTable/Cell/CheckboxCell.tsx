@@ -8,6 +8,8 @@ export interface CheckboxCellProps {
   isHeader?: boolean;
   isAllSelected?: boolean;
   isSomeSelected?: boolean;
+  /** 항상 행 번호만 표시 (체크박스 비활성화) */
+  showRowNumber?: boolean;
 }
 
 export function CheckboxCell({
@@ -17,11 +19,13 @@ export function CheckboxCell({
   isHeader = false,
   isAllSelected = false,
   isSomeSelected = false,
+  showRowNumber = false,
 }: CheckboxCellProps) {
   const [isHovered, setIsHovered] = useState(false);
   const classes = dataTableCell({ variant: "utility" });
 
-  const showCheckbox = isHeader || isHovered || isSelected;
+  // showRowNumber가 true면 항상 행 번호만 표시
+  const showCheckbox = !showRowNumber && (isHeader || isHovered || isSelected);
 
   return (
     <div className={classes.base}>
