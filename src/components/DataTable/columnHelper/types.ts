@@ -6,7 +6,7 @@ import type { ChipVariant, CellAlign } from "../../../types/table";
 // 공통 옵션
 // ============================================
 
-export interface CommonColumnOptions {
+export interface CommonColumnOptions<TData = unknown> {
   /** 컬럼 너비 */
   width?: number | string;
   /** 최소 너비 */
@@ -23,6 +23,8 @@ export interface CommonColumnOptions {
   sticky?: "left" | "right";
   /** 텍스트 정렬 */
   align?: CellAlign;
+  /** 셀 렌더링 override (기본 Cell 컴포넌트 대신 사용) */
+  cell?: (info: CellContext<TData, unknown>) => ReactNode;
 }
 
 // ============================================
@@ -30,7 +32,7 @@ export interface CommonColumnOptions {
 // ============================================
 
 /** Text 컬럼 옵션 */
-export interface TextOptions extends CommonColumnOptions {
+export interface TextOptions<TData = unknown> extends CommonColumnOptions<TData> {
   /** 말줄임 처리 */
   truncate?: boolean;
   /** 복사 가능 */
@@ -38,7 +40,7 @@ export interface TextOptions extends CommonColumnOptions {
 }
 
 /** Number 컬럼 옵션 */
-export interface NumberOptions extends CommonColumnOptions {
+export interface NumberOptions<TData = unknown> extends CommonColumnOptions<TData> {
   /** 포맷 */
   format?: "number" | "currency" | "percent";
   /** 로케일 */
@@ -50,7 +52,7 @@ export interface NumberOptions extends CommonColumnOptions {
 }
 
 /** Chip 컬럼 옵션 */
-export interface ChipOptions extends CommonColumnOptions {
+export interface ChipOptions<TData = unknown> extends CommonColumnOptions<TData> {
   /** 고정 variant */
   variant?: ChipVariant;
   /** 값에 따라 동적 variant */
@@ -60,7 +62,7 @@ export interface ChipOptions extends CommonColumnOptions {
 }
 
 /** Avatar 컬럼 옵션 */
-export interface AvatarOptions extends CommonColumnOptions {
+export interface AvatarOptions<TData = unknown> extends CommonColumnOptions<TData> {
   /** 이름 표시 여부 */
   showName?: boolean;
   /** 이름 필드 키 (다른 필드에서 가져올 때) */
@@ -70,17 +72,21 @@ export interface AvatarOptions extends CommonColumnOptions {
 }
 
 /** Checkbox (Selection) 컬럼 옵션 */
-export interface CheckboxOptions {
+export interface CheckboxOptions<TData = unknown> {
   /** 컬럼 너비 */
   width?: number;
   /** 행 번호 표시 */
   showRowNumber?: boolean;
+  /** 셀 렌더링 override */
+  cell?: (info: CellContext<TData, unknown>) => ReactNode;
 }
 
 /** Controller (Actions) 컬럼 옵션 */
-export interface ControllerOptions {
+export interface ControllerOptions<TData = unknown> {
   /** 컬럼 너비 */
   width?: number;
+  /** 셀 렌더링 override */
+  cell?: (info: CellContext<TData, unknown>) => ReactNode;
 }
 
 /** 개별 액션 정의 */
@@ -100,34 +106,34 @@ export interface ActionItem<TData = unknown> {
 }
 
 /** TextField 컬럼 옵션 */
-export interface TextFieldOptions extends CommonColumnOptions {
+export interface TextFieldOptions<TData = unknown> extends CommonColumnOptions<TData> {
   /** placeholder */
   placeholder?: string;
   /** 값 변경 핸들러 */
   onEdit?: (rowId: string, key: string, value: string) => void;
   /** 비활성화 조건 */
-  disabled?: (row: unknown) => boolean;
+  disabled?: (row: TData) => boolean;
 }
 
 /** Date 컬럼 옵션 */
-export interface DateOptions extends CommonColumnOptions {
+export interface DateOptions<TData = unknown> extends CommonColumnOptions<TData> {
   /** 날짜 포맷 (기본: yyyy-MM-dd) */
   format?: string;
 }
 
 /** Link 컬럼 옵션 */
-export interface LinkOptions extends CommonColumnOptions {
+export interface LinkOptions<TData = unknown> extends CommonColumnOptions<TData> {
   /** href 필드 키 */
   hrefKey?: string;
   /** href 생성 함수 */
-  getHref?: (value: unknown, row: unknown) => string;
+  getHref?: (value: unknown, row: TData) => string;
   /** 새 탭에서 열기 */
   external?: boolean;
 }
 
 /** Custom 컬럼 옵션 */
-export interface CustomOptions<TData> extends CommonColumnOptions {
-  /** 커스텀 셀 렌더러 */
+export interface CustomOptions<TData = unknown> extends Omit<CommonColumnOptions<TData>, 'cell'> {
+  /** 커스텀 셀 렌더러 (필수) */
   cell: (info: CellContext<TData, unknown>) => ReactNode;
   /** 커스텀 헤더 렌더러 */
   header?: string | ((info: HeaderContext<TData, unknown>) => ReactNode);
@@ -142,29 +148,32 @@ export interface ColumnHelper<TData> {
    * 체크박스 (선택) 컬럼
    * @example col.checkbox()
    * @example col.checkbox({ showRowNumber: true })
+   * @example col.checkbox({ cell: (info) => <CustomCheckbox /> })
    */
-  checkbox: (options?: CheckboxOptions) => ColumnDef<TData>;
+  checkbox: (options?: CheckboxOptions<TData>) => ColumnDef<TData>;
 
   /**
    * 텍스트 컬럼
    * @example col.text('name', '이름')
    * @example col.text('email', '이메일', { enableSorting: true, copyable: true })
+   * @example col.text('name', '이름', { cell: (info) => <Bold>{info.getValue()}</Bold> })
    */
   text: (
     key: keyof TData & string,
     header: string,
-    options?: TextOptions
+    options?: TextOptions<TData>
   ) => ColumnDef<TData>;
 
   /**
    * 숫자 컬럼
    * @example col.number('price', '가격')
    * @example col.number('salary', '연봉', { format: 'currency', currency: 'KRW' })
+   * @example col.number('score', '점수', { cell: (info) => <ScoreBar value={info.getValue()} /> })
    */
   number: (
     key: keyof TData & string,
     header: string,
-    options?: NumberOptions
+    options?: NumberOptions<TData>
   ) => ColumnDef<TData>;
 
   /**
@@ -175,18 +184,19 @@ export interface ColumnHelper<TData> {
   date: (
     key: keyof TData & string,
     header: string,
-    options?: DateOptions
+    options?: DateOptions<TData>
   ) => ColumnDef<TData>;
 
   /**
    * Chip 컬럼
    * @example col.chip('status', '상태', { variant: 'success' })
    * @example col.chip('priority', '우선순위', { getVariant: (v) => v === 'high' ? 'error' : 'default' })
+   * @example col.chip('tag', '태그', { cell: (info) => <CustomChip value={info.getValue()} /> })
    */
   chip: (
     key: keyof TData & string,
     header: string,
-    options?: ChipOptions
+    options?: ChipOptions<TData>
   ) => ColumnDef<TData>;
 
   /**
@@ -197,7 +207,7 @@ export interface ColumnHelper<TData> {
   avatar: (
     key: keyof TData & string,
     header: string,
-    options?: AvatarOptions
+    options?: AvatarOptions<TData>
   ) => ColumnDef<TData>;
 
   /**
@@ -208,7 +218,7 @@ export interface ColumnHelper<TData> {
   link: (
     key: keyof TData & string,
     header: string,
-    options?: LinkOptions
+    options?: LinkOptions<TData>
   ) => ColumnDef<TData>;
 
   /**
@@ -218,21 +228,22 @@ export interface ColumnHelper<TData> {
   textfield: (
     key: keyof TData & string,
     header: string,
-    options?: TextFieldOptions
+    options?: TextFieldOptions<TData>
   ) => ColumnDef<TData>;
 
   /**
    * 액션 버튼 컬럼
    * @example col.controller([{ key: 'edit', icon: 'edit', onClick: handleEdit }])
+   * @example col.controller([...], { cell: (info) => <CustomActions row={info.row} /> })
    */
   controller: (
     actions: ActionItem<TData>[],
-    options?: ControllerOptions
+    options?: ControllerOptions<TData>
   ) => ColumnDef<TData>;
 
   /**
-   * 커스텀 렌더링 컬럼
-   * @example col.custom('custom', { cell: (info) => <MyComponent data={info.getValue()} /> })
+   * 커스텀 렌더링 컬럼 (accessorKey 없이 완전 자유)
+   * @example col.custom('actions', { cell: (info) => <MyComponent data={info.row.original} /> })
    */
   custom: (id: string, options: CustomOptions<TData>) => ColumnDef<TData>;
 }

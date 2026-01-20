@@ -46,7 +46,7 @@ export function createColumnHelper<TData>(): ColumnHelper<TData> {
     // ============================================
     // Checkbox (Selection)
     // ============================================
-    checkbox: (options: CheckboxOptions = {}): ColumnDef<TData> => ({
+    checkbox: (options: CheckboxOptions<TData> = {}): ColumnDef<TData> => ({
       id: "__select__",
       header: ({ table }) => (
         <HeaderCellCheck
@@ -55,20 +55,22 @@ export function createColumnHelper<TData>(): ColumnHelper<TData> {
           onChange={table.toggleAllRowsSelected}
         />
       ),
-      cell: ({ row, table }) => {
-        const pageIndex = table.getState().pagination?.pageIndex ?? 0;
-        const pageSize = table.getState().pagination?.pageSize ?? 10;
-        const rowNumber = pageIndex * pageSize + row.index + 1;
+      cell:
+        options.cell ??
+        (({ row, table }) => {
+          const pageIndex = table.getState().pagination?.pageIndex ?? 0;
+          const pageSize = table.getState().pagination?.pageSize ?? 10;
+          const rowNumber = pageIndex * pageSize + row.index + 1;
 
-        return (
-          <CellCheckbox
-            rowNumber={rowNumber}
-            isSelected={row.getIsSelected()}
-            onChange={(checked) => row.toggleSelected(checked)}
-            showRowNumber={options.showRowNumber}
-          />
-        );
-      },
+          return (
+            <CellCheckbox
+              rowNumber={rowNumber}
+              isSelected={row.getIsSelected()}
+              onChange={(checked) => row.toggleSelected(checked)}
+              showRowNumber={options.showRowNumber}
+            />
+          );
+        }),
       size: options.width ?? 48,
       enableSorting: false,
       enableResizing: false,
@@ -84,13 +86,15 @@ export function createColumnHelper<TData>(): ColumnHelper<TData> {
     text: (
       key: keyof TData & string,
       header: string,
-      options: TextOptions = {}
+      options: TextOptions<TData> = {}
     ): ColumnDef<TData> => ({
       accessorKey: key,
       header,
-      cell: (info) => (
-        <CellText value={info.getValue() as string | number | null} />
-      ),
+      cell:
+        options.cell ??
+        ((info) => (
+          <CellText value={info.getValue() as string | number | null} />
+        )),
       size: typeof options.width === "number" ? options.width : undefined,
       minSize: options.minWidth,
       maxSize: options.maxWidth,
@@ -110,14 +114,16 @@ export function createColumnHelper<TData>(): ColumnHelper<TData> {
     number: (
       key: keyof TData & string,
       header: string,
-      options: NumberOptions = {}
+      options: NumberOptions<TData> = {}
     ): ColumnDef<TData> => ({
       accessorKey: key,
       header,
-      cell: (info) => {
-        const value = info.getValue() as number | null;
-        return <CellNumber value={value} />;
-      },
+      cell:
+        options.cell ??
+        ((info) => {
+          const value = info.getValue() as number | null;
+          return <CellNumber value={value} />;
+        }),
       size: typeof options.width === "number" ? options.width : undefined,
       minSize: options.minWidth,
       maxSize: options.maxWidth,
@@ -136,16 +142,18 @@ export function createColumnHelper<TData>(): ColumnHelper<TData> {
     date: (
       key: keyof TData & string,
       header: string,
-      options: DateOptions = {}
+      options: DateOptions<TData> = {}
     ): ColumnDef<TData> => ({
       accessorKey: key,
       header,
-      cell: (info) => (
-        <CellDate
-          value={info.getValue() as string | Date | null}
-          format={options.format}
-        />
-      ),
+      cell:
+        options.cell ??
+        ((info) => (
+          <CellDate
+            value={info.getValue() as string | Date | null}
+            format={options.format}
+          />
+        )),
       size: typeof options.width === "number" ? options.width : undefined,
       minSize: options.minWidth,
       maxSize: options.maxWidth,
@@ -164,21 +172,23 @@ export function createColumnHelper<TData>(): ColumnHelper<TData> {
     chip: (
       key: keyof TData & string,
       header: string,
-      options: ChipOptions = {}
+      options: ChipOptions<TData> = {}
     ): ColumnDef<TData> => ({
       accessorKey: key,
       header,
-      cell: (info) => {
-        const value = info.getValue();
-        const variant = options.getVariant
-          ? options.getVariant(value)
-          : options.variant ?? "default";
-        const label = options.getLabel
-          ? options.getLabel(value)
-          : String(value ?? "");
+      cell:
+        options.cell ??
+        ((info) => {
+          const value = info.getValue();
+          const variant = options.getVariant
+            ? options.getVariant(value)
+            : options.variant ?? "default";
+          const label = options.getLabel
+            ? options.getLabel(value)
+            : String(value ?? "");
 
-        return <CellChip label={label} variant={variant} />;
-      },
+          return <CellChip label={label} variant={variant} />;
+        }),
       size: typeof options.width === "number" ? options.width : undefined,
       minSize: options.minWidth,
       maxSize: options.maxWidth,
@@ -197,32 +207,38 @@ export function createColumnHelper<TData>(): ColumnHelper<TData> {
     avatar: (
       key: keyof TData & string,
       header: string,
-      options: AvatarOptions = {}
+      options: AvatarOptions<TData> = {}
     ): ColumnDef<TData> => ({
       accessorKey: key,
       header,
-      cell: (info) => {
-        const row = info.row.original as Record<string, unknown>;
-        const value = info.getValue();
+      cell:
+        options.cell ??
+        ((info) => {
+          const row = info.row.original as Record<string, unknown>;
+          const value = info.getValue();
 
-        // Avatar 데이터가 객체인 경우 { name, src }
-        if (typeof value === "object" && value !== null) {
-          const avatarData = value as { name?: string; src?: string };
+          // Avatar 데이터가 객체인 경우 { name, src }
+          if (typeof value === "object" && value !== null) {
+            const avatarData = value as { name?: string; src?: string };
+            return (
+              <CellAvatar
+                name={avatarData.name ?? ""}
+                src={avatarData.src}
+                showName={options.showName}
+              />
+            );
+          }
+
+          // 단순 이름인 경우
+          const name = String(value ?? "");
+          const src = options.srcKey
+            ? String(row[options.srcKey] ?? "")
+            : undefined;
+
           return (
-            <CellAvatar
-              name={avatarData.name ?? ""}
-              src={avatarData.src}
-              showName={options.showName}
-            />
+            <CellAvatar name={name} src={src} showName={options.showName} />
           );
-        }
-
-        // 단순 이름인 경우
-        const name = String(value ?? "");
-        const src = options.srcKey ? String(row[options.srcKey] ?? "") : undefined;
-
-        return <CellAvatar name={name} src={src} showName={options.showName} />;
-      },
+        }),
       size: typeof options.width === "number" ? options.width : undefined,
       minSize: options.minWidth,
       maxSize: options.maxWidth,
@@ -241,31 +257,33 @@ export function createColumnHelper<TData>(): ColumnHelper<TData> {
     link: (
       key: keyof TData & string,
       header: string,
-      options: LinkOptions = {}
+      options: LinkOptions<TData> = {}
     ): ColumnDef<TData> => ({
       accessorKey: key,
       header,
-      cell: (info) => {
-        const value = info.getValue();
-        const row = info.row.original as Record<string, unknown>;
+      cell:
+        options.cell ??
+        ((info) => {
+          const value = info.getValue();
+          const row = info.row.original;
 
-        let href: string;
-        if (options.getHref) {
-          href = options.getHref(value, row);
-        } else if (options.hrefKey) {
-          href = String(row[options.hrefKey] ?? "");
-        } else {
-          href = String(value ?? "");
-        }
+          let href: string;
+          if (options.getHref) {
+            href = options.getHref(value, row);
+          } else if (options.hrefKey) {
+            href = String((row as Record<string, unknown>)[options.hrefKey] ?? "");
+          } else {
+            href = String(value ?? "");
+          }
 
-        return (
-          <CellLink
-            value={String(value ?? "")}
-            href={href}
-            external={options.external}
-          />
-        );
-      },
+          return (
+            <CellLink
+              value={String(value ?? "")}
+              href={href}
+              external={options.external}
+            />
+          );
+        }),
       size: typeof options.width === "number" ? options.width : undefined,
       minSize: options.minWidth,
       maxSize: options.maxWidth,
@@ -284,25 +302,27 @@ export function createColumnHelper<TData>(): ColumnHelper<TData> {
     textfield: (
       key: keyof TData & string,
       header: string,
-      options: TextFieldOptions = {}
+      options: TextFieldOptions<TData> = {}
     ): ColumnDef<TData> => ({
       accessorKey: key,
       header,
-      cell: (info) => {
-        const row = info.row.original as { id: string };
-        const isDisabled = options.disabled
-          ? options.disabled(info.row.original)
-          : false;
+      cell:
+        options.cell ??
+        ((info) => {
+          const row = info.row.original as { id: string };
+          const isDisabled = options.disabled
+            ? options.disabled(info.row.original)
+            : false;
 
-        return (
-          <CellTextField
-            value={String(info.getValue() ?? "")}
-            placeholder={options.placeholder}
-            disabled={isDisabled}
-            onChange={(value) => options.onEdit?.(row.id, key, value)}
-          />
-        );
-      },
+          return (
+            <CellTextField
+              value={String(info.getValue() ?? "")}
+              placeholder={options.placeholder}
+              disabled={isDisabled}
+              onChange={(value) => options.onEdit?.(row.id, key, value)}
+            />
+          );
+        }),
       size: typeof options.width === "number" ? options.width : undefined,
       minSize: options.minWidth,
       maxSize: options.maxWidth,
@@ -320,30 +340,32 @@ export function createColumnHelper<TData>(): ColumnHelper<TData> {
     // ============================================
     controller: (
       actions: ActionItem<TData>[],
-      options: ControllerOptions = {}
+      options: ControllerOptions<TData> = {}
     ): ColumnDef<TData> => ({
       id: "__actions__",
       header: "",
-      cell: (info) => {
-        const row = info.row.original;
-        const visibleActions = actions.filter(
-          (action) => !action.hidden?.(row)
-        );
+      cell:
+        options.cell ??
+        ((info) => {
+          const row = info.row.original;
+          const visibleActions = actions.filter(
+            (action) => !action.hidden?.(row)
+          );
 
-        return (
-          <CellController>
-            {visibleActions.map((action) => (
-              <CellController.Button
-                key={action.key}
-                icon={action.icon}
-                label={action.label}
-                disabled={action.disabled?.(row)}
-                onClick={() => action.onClick(row)}
-              />
-            ))}
-          </CellController>
-        );
-      },
+          return (
+            <CellController>
+              {visibleActions.map((action) => (
+                <CellController.Button
+                  key={action.key}
+                  icon={action.icon}
+                  label={action.label}
+                  disabled={action.disabled?.(row)}
+                  onClick={() => action.onClick(row)}
+                />
+              ))}
+            </CellController>
+          );
+        }),
       size: options.width,
       enableSorting: false,
       enableResizing: false,
